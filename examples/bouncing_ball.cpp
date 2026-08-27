@@ -13,61 +13,50 @@ public:
     }
 
 protected:
-    void update() override {
-    auto& fb = window()->framebuffer();
+    void backGroundAnimation(const std::uint32_t width, const std::uint32_t height, app_framework::Framebuffer& fb) {
+        // Animation time
+        const auto now = std::chrono::steady_clock::now();
+        const float time = std::chrono::duration<float>(now.time_since_epoch()).count();
 
-    const std::uint32_t width = fb.width();
-    const std::uint32_t height = fb.height();
+        // Background animation parameters
+        constexpr float scroll_speed = 120.0f;
+        constexpr float wave_scale = 0.015f;
+        constexpr float color_speed = 1.0f;
 
-    // Animation time
-    const auto now = std::chrono::steady_clock::now();
-    const float time =
-        std::chrono::duration<float>(
-            now.time_since_epoch()
-        ).count();
+        const float offset = time * scroll_speed;
+        const float phase = time * color_speed;
 
-    // Background animation parameters
-    constexpr float scroll_speed = 120.0f;
-    constexpr float wave_scale = 0.015f;
-    constexpr float color_speed = 1.0f;
+        // Animated background
+        for (std::uint32_t y = 0; y < height; ++y) {
+            const float fy = static_cast<float>(y) / static_cast<float>(height);
 
-    const float offset = time * scroll_speed;
-    const float phase = time * color_speed;
+            for (std::uint32_t x = 0; x < width; ++x) {
+                const float wave = std::sin((static_cast<float>(x) + offset) * wave_scale + fy * 4.0f);
 
-    // Animated background
-    for (std::uint32_t y = 0; y < height; ++y) {
-        const float fy =
-            static_cast<float>(y) / static_cast<float>(height);
+                const float r = 0.5f + 0.5f * std::sin(wave * 2.0f + phase);
 
-        for (std::uint32_t x = 0; x < width; ++x) {
-            const float wave =
-                std::sin(
-                    (static_cast<float>(x) + offset) * wave_scale +
-                    fy * 4.0f
+                const float g = 0.5f + 0.5f * std::sin( wave * 2.0f + phase + 2.094f );
+
+                const float b = 0.5f + 0.5f * std::sin( wave * 2.0f + phase + 4.188f );
+
+                fb.set_pixel(
+                    x,
+                    y,
+                    static_cast<std::uint8_t>(r * 255.0f),
+                    static_cast<std::uint8_t>(g * 255.0f),
+                    static_cast<std::uint8_t>(b * 255.0f)
                 );
-
-            const float r =
-                0.5f + 0.5f * std::sin(wave * 2.0f + phase);
-
-            const float g =
-                0.5f + 0.5f * std::sin(
-                    wave * 2.0f + phase + 2.094f
-                );
-
-            const float b =
-                0.5f + 0.5f * std::sin(
-                    wave * 2.0f + phase + 4.188f
-                );
-
-            fb.set_pixel(
-                x,
-                y,
-                static_cast<std::uint8_t>(r * 255.0f),
-                static_cast<std::uint8_t>(g * 255.0f),
-                static_cast<std::uint8_t>(b * 255.0f)
-            );
+            }
         }
     }
+
+    void update() override {
+        auto& fb = window()->framebuffer();
+
+        const std::uint32_t width = fb.width();
+        const std::uint32_t height = fb.height();
+
+        backGroundAnimation(width, height, fb);
 
         // Ball properties
         constexpr std::int32_t ball_radius = 60; // signed, so loop/comparisons below stay signed
