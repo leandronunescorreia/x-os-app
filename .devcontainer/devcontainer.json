@@ -1,0 +1,49 @@
+{
+  "name": "cpp-alpine",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".",
+    "args": {
+      "USER_UID": "1000",
+      "USER_GID": "1000"
+    }
+  },
+
+  "remoteUser": "dev",
+
+  // Mount the workspace at a fixed path so tasks/launch configs are stable.
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+  "workspaceFolder": "/workspace",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools",
+        "ms-vscode.cpptools-extension-pack",
+        "ms-vscode.cmake-tools",
+        "twxs.cmake",
+        "vadimcn.vscode-lldb"
+      ],
+      "settings": {
+        "C_Cpp.default.compilerPath": "/usr/bin/g++",
+        "C_Cpp.default.cStandard": "c17",
+        "C_Cpp.default.cppStandard": "c++20",
+        "cmake.configureOnOpen": true,
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+
+  // musl's default stack size / ptrace restrictions can trip up gdb/lldb
+  // inside containers; these caps make debugging behave like a normal host.
+  "runArgs": [
+    "--cap-add=SYS_PTRACE",
+    "--security-opt",
+    "seccomp=unconfined"
+  ],
+
+  // Sanity-check the toolchain each time the container is created.
+  "postCreateCommand": "g++ --version && cmake --version",
+
+  "forwardPorts": []
+}
