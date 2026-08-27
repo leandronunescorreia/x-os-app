@@ -91,9 +91,11 @@ public:
 
     void present() override {
         if (!open_ || !display_) return;
+        framebuffer_.swap();
         XImage* image = XCreateImage(display_, DefaultVisual(display_, screen_),
                                      DefaultDepth(display_, screen_), ZPixmap, 0,
-                                     reinterpret_cast<char*>(framebuffer_.data()),
+                                     const_cast<char*>(reinterpret_cast<const char*>(
+                                         framebuffer_.front_data())),
                                      framebuffer_.width(), framebuffer_.height(), 32, framebuffer_.stride());
         if (!image) return;
         XPutImage(display_, window_, gc_, image, 0, 0, 0, 0,

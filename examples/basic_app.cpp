@@ -25,10 +25,27 @@ protected:
     }
 };
 
-int main() {
+int start() {
     BasicApp app;
     if (!app.initialize({"App Framework Example", 800, 450})) return 1;
     const int result = app.run();
     app.shutdown();
-    return result;
+    return result;    
 }
+
+
+#ifdef _WIN32
+#include <windows.h>
+int WINAPI WinMain(
+    HINSTANCE hInstance,
+    HINSTANCE hPrevInstance,
+    LPSTR lpCmdLine,
+    int nCmdShow)
+{
+    return start();
+}
+#else
+int main() {
+    return start();
+}
+#endif

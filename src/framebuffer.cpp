@@ -10,7 +10,8 @@ Framebuffer::Framebuffer(std::uint32_t width, std::uint32_t height) {
 }
 
 bool Framebuffer::resize(std::uint32_t width, std::uint32_t height) {
-    const std::uint64_t byte_count = static_cast<std::uint64_t>(width) * height * 4;
+    const std::uint64_t single_buffer_bytes = static_cast<std::uint64_t>(width) * height * 4;
+    const std::uint64_t byte_count = single_buffer_bytes * 2;
     if (byte_count > std::numeric_limits<std::size_t>::max()) {
         return false;
     }
@@ -22,16 +23,19 @@ bool Framebuffer::resize(std::uint32_t width, std::uint32_t height) {
     }
     width_ = width;
     height_ = height;
+    active_index_ = 0;
     return true;
 }
 
 void Framebuffer::clear(std::uint8_t red, std::uint8_t green,
                         std::uint8_t blue, std::uint8_t alpha) {
-    for (std::size_t index = 0; index < pixels_.size(); index += 4) {
-        pixels_[index] = blue;
-        pixels_[index + 1] = green;
-        pixels_[index + 2] = red;
-        pixels_[index + 3] = alpha;
+    const std::size_t buffer_size = stride() * height_;
+    const std::size_t offset = active_index_ * buffer_size;
+    for (std::size_t i = 0; i < buffer_size; i += 4) {
+        pixels_[offset + i] = blue;
+        pixels_[offset + i + 1] = green;
+        pixels_[offset + i + 2] = red;
+        pixels_[offset + i + 3] = alpha;
     }
 }
 
@@ -41,11 +45,16 @@ void Framebuffer::set_pixel(std::uint32_t x, std::uint32_t y,
     if (x >= width_ || y >= height_) {
         return;
     }
-    const std::size_t index = static_cast<std::size_t>(y) * stride() + x * 4;
+    const std::size_t offset = active_index_ * stride() * height_;
+    const std::size_t index = offset + static_cast<std::size_t>(y) * stride() + x * 4;
     pixels_[index] = blue;
     pixels_[index + 1] = green;
     pixels_[index + 2] = red;
     pixels_[index + 3] = alpha;
+}
+
+void Framebuffer::swap() {
+    active_index_ = 1 - active_index_;
 }
 
 } // namespace app_framework

@@ -52,6 +52,7 @@ public:
 
     void present() override {
         if (!hwnd_ || !open_) return;
+        framebuffer_.swap();
         HDC dc = GetDC(hwnd_);
         if (!dc) return;
         BITMAPINFO info{};
@@ -64,7 +65,7 @@ public:
         RECT client;
         GetClientRect(hwnd_, &client);
         StretchDIBits(dc, 0, 0, client.right, client.bottom, 0, 0,
-                      framebuffer_.width(), framebuffer_.height(), framebuffer_.data(),
+                      framebuffer_.width(), framebuffer_.height(), framebuffer_.front_data(),
                       &info, DIB_RGB_COLORS, SRCCOPY);
         ReleaseDC(hwnd_, dc);
     }

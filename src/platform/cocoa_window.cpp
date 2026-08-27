@@ -221,7 +221,10 @@ public:
         }
     }
 
-    void present() override { objc_call<void>(view_, S("setNeedsDisplay:"), (BOOL) YES); }
+    void present() override {
+        framebuffer_.swap();
+        objc_call<void>(view_, S("setNeedsDisplay:"), (BOOL) YES);
+    }
 
     void close() override {
         if (!open_ && !window_) return;

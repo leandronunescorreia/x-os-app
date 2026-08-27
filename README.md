@@ -12,9 +12,23 @@ A small C++17 windowed application framework with native backends for Win32, X11
 ## Build
 
 ```sh
+rm -rf build
 cmake -B build -S .
 cmake --build build
+```
+# release build
+```sh
+rm -rf build
+cmake --build build --config Release
 ctest --test-dir build --output-on-failure
+```
+
+## to use visual studio to build
+```sh
+cmd -> rmdir /s /q build
+powershell -> Remove-Item -Recurse -Force build
+cmake -B build -S . -G "Visual Studio 17 2022" -A x64
+cmake --build build --config Release
 ```
 
 Linux requires the X11 development package. The native backend is selected by CMake:

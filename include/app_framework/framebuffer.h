@@ -17,16 +17,19 @@ public:
                    std::uint8_t red, std::uint8_t green, std::uint8_t blue,
                    std::uint8_t alpha = 255);
 
+    void swap();
     std::uint32_t width() const noexcept { return width_; }
     std::uint32_t height() const noexcept { return height_; }
     std::size_t stride() const noexcept { return static_cast<std::size_t>(width_) * 4; }
-    std::uint8_t* data() noexcept { return pixels_.data(); }
-    const std::uint8_t* data() const noexcept { return pixels_.data(); }
+    std::uint8_t* data() noexcept { return pixels_.data() + active_index_ * stride() * height_; }
+    const std::uint8_t* data() const noexcept { return pixels_.data() + active_index_ * stride() * height_; }
+    const std::uint8_t* front_data() const noexcept { return pixels_.data() + (1 - active_index_) * stride() * height_; }
     std::size_t size() const noexcept { return pixels_.size(); }
 
 private:
     std::uint32_t width_ = 0;
     std::uint32_t height_ = 0;
+    std::uint8_t active_index_ = 0;
     std::vector<std::uint8_t> pixels_;
 };
 
